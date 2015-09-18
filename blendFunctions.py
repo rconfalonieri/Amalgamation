@@ -122,7 +122,7 @@ def findLeastGeneralizedBlends(modelAtoms, inputSpaces, highestValue, blends):
                 blendName = blendName + "_" + lpToCaslStr(specName) + "_" + str(step)
             # blendName += "-v"+str(value)
 
-            print "Checking consistency of " + blendName + ""
+            #print "Checking consistency of " + blendName + ""
             #generate tptp format of theory and call eprover to check consistency
             blendTptpName = "amalgamTmp_"+blendName+".tptp"
             tries = 0
@@ -138,7 +138,7 @@ def findLeastGeneralizedBlends(modelAtoms, inputSpaces, highestValue, blends):
                 if blendFileSize != 0:
                     break
                 
-                print "generating tptp because " + blendTptpName + " file was not found"
+                #print "generating tptp because " + blendTptpName + " file was not found"
                 ###TBD call HETS API
                 subprocess.call([hetsExe, "-o tptp", "amalgamTmp.casl"])
                 print "Done generating tptp"
@@ -257,13 +257,14 @@ def writeJsonOutput(blends,inputSpaceNames):
     jsonOutput['blendList'] = []
     
     
-    print inputSpaceNames
+    #print inputSpaceNames
     blendNr = 1
     for blend in blends:
+
         jsonBlend = {}
         
         blendStr = blend['prettyHetsStr']
-        print 'Blend'+str(blendNr)
+        #print 'Blend'+str(blendNr)
                
         genericSpacePattern = "(spec\sGeneric.*?end)"
         jsonBlend['blendId'] = str(blendNr)
@@ -271,18 +272,26 @@ def writeJsonOutput(blends,inputSpaceNames):
         jsonBlend['cost'] = blend['generalizationValue']
         match = re.search(genericSpacePattern,blendStr,re.DOTALL)
         jsonBlend['genericSpace'] = match.group(0)
+        #print jsonBlend['genericSpace']
+        #sys.exit()
         
         #'combi': {'spec_G7': 1, 'spec_Bbmin': 3}
         #G7_gen_1 
         combi = blend['combi']
+
         #['G7', 'Bbmin']
         inputSpaceNr = 1
         for inputSpaceName in inputSpaceNames:
             inputSpace = inputSpaceName
             genSpaceName= '_'+'gen'+'_'+str(combi[toLPName(inputSpace,'spec')])
-            print 'TETEET:' + genSpaceName
-            genericSpacePattern = "(spec\s"+inputSpace+"(?=)"+genSpaceName+".*?end)"
+            #print genSpaceName
+            if combi[toLPName(inputSpace,'spec')] == 0:
+                genericSpacePattern = "(spec\s"+inputSpace+"(?=).*?end)"
+            else:
+                genericSpacePattern = "(spec\s"+inputSpace+"(?=)"+genSpaceName+".*?end)"
+            print genericSpacePattern
             match = re.search(genericSpacePattern,blendStr,re.DOTALL)
+            print match.group(0)
             jsonBlend['input'+str(inputSpaceNr)] = match.group(0)
 
             inputSpaceNr = inputSpaceNr +1
